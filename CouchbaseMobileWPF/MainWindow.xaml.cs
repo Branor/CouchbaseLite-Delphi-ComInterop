@@ -13,8 +13,8 @@ namespace CouchbaseMobileWPF
 
         CouchbaseLiteFacade _manager;
         string documentId;
-        const string TAG = "CouchbaseEvents";
-        const string DB_NAME = "couchbaseevents";
+        const string TAG = "DelphiDemo";
+        const string DB_NAME = "delphi";
 
         private Database _db;
 
@@ -29,12 +29,12 @@ namespace CouchbaseMobileWPF
         {
             var properties =
             "{" +
-                "\"name\": \"Roi Katz\", " +
-                "\"age\": 31," +
+                "\"name\": \"David Ostrovsky\", " +
+                "\"age\": 36," +
                 "\"database\" : \"Couchbase\"" +
             "}";
 
-            var docInsertedId = _manager.Insert(properties);
+            var docInsertedId = _manager.Insert(id.Text, properties);
             MessageBox.Show("Doc-id: " + docInsertedId, "Insert");
 
             documentId = docInsertedId;
@@ -47,8 +47,8 @@ namespace CouchbaseMobileWPF
 
             var newProperties =
                         "{" +
-                            "\"name\": \"Roi Katz!\", " +
-                            "\"age\": 32," +
+                            "\"name\": \"David 'Code Monkey' Ostrovsky\", " +
+                            "\"age\": " + DateTime.Now.Second + "," +
                             "\"database\" : \"CB\"" +
                         "}";
 

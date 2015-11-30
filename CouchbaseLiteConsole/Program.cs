@@ -20,7 +20,7 @@ namespace CouchbaseLiteConsole
                 "\"database\" : \"Couchbase\"" +
             "}";
 
-            var docInsertedId = manager.Insert(properties);
+            var docInsertedId = manager.Insert("_test", properties);
             Console.WriteLine("Doc-id: " + docInsertedId);
 
             var docGet = manager.Get(docInsertedId);

@@ -11,6 +11,6 @@
         <Button Content="Update" Click="UpdateDocumentClick"></Button>
         <Button Content="Read" Click="GetDocumentClick"></Button>
         <Button Content="Delete" Click="DeleteDocumentClick"></Button>
-        <TextBox Name="id"/>
+        <TextBox Name="id" Text="_test"/>
     </StackPanel>
 </Window>

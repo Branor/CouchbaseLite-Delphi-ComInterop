@@ -1,19 +1,25 @@
 {
-    "log":["CRUD+", "REST+", "Changes+", "Attach+"],
-    "databases": {
-        "couchbaselitedemo": {
-            "server":"http://rois-macbook-pro.local:8091",
-            "bucket" : "default",
-            "sync":`
-              function (doc, oldDoc) {
-                channel ("delphi");
-            }`,
-            "users": {
-                "GUEST": {
-                    "disabled": false,
-                    "admin_channels": ["*"]
-                }
-            }
+  "log": [ "CRUD+", "REST+", "Changes+", "Attach+" ],
+  "databases": {
+    "delphi": {
+      "server": "http://localhost:8091",
+      "bucket": "delphi",
+      "sync": `
+      function (doc,
+      oldDoc) {
+        channel ("delphi");
+      }
+      `,
+      "users": {
+        "GUEST": {
+          "disabled": false,
+          "admin_channels": [ "*" ]
+        },
+        "david": {
+          "admin_channels": [ "*", "delphi" ],
+          "password": "12345"
         }
+      }
     }
+  }
 }

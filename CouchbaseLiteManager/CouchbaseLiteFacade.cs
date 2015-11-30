@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Newtonsoft.Json;
+using Couchbase.Lite.Auth;
 
 namespace CouchbaseLiteManager
 {
@@ -17,7 +18,7 @@ namespace CouchbaseLiteManager
         private Manager _manager;
         private Database _database;
 
-        private const string DB_NAME = "localdb";
+        private const string DB_NAME = "delphidb";
         private const string TAG = "CouchbaseLiteDemo";
 
         private Replication pull;
@@ -27,12 +28,22 @@ namespace CouchbaseLiteManager
         {
             _manager = Manager.SharedInstance;
 
-            _database = _manager.GetDatabase(DB_NAME);
+            _database = _manager.GetDatabase(DB_NAME + DateTime.Now.GetHashCode());
         }
 
-        public string Insert(string propertiesJson)
+        public string Insert(string docId, string propertiesJson)
         {
-            var document = _database.CreateDocument();
+            Document document;
+
+            if (string.IsNullOrEmpty(docId))
+                document = _database.CreateDocument();
+            else
+                document = _database.GetDocument(docId);
+
+            if (document == null)
+                return "Error creating new document.";
+            if (document.Properties != null && document.Properties.Count > 0)
+                return "Document already exists.";
 
             var properties = JsonConvert.DeserializeObject<Dictionary<string, object>>(propertiesJson);
             var revision = document.PutProperties(properties);
@@ -42,9 +53,12 @@ namespace CouchbaseLiteManager
 
         public string Get(string docId)
         {
-            var doc = _database.GetDocument(docId);
+            var doc = _database.GetExistingDocument(docId);
 
-            return JsonConvert.SerializeObject(doc.Properties, Formatting.Indented);
+            if (doc != null)
+                return JsonConvert.SerializeObject(doc.Properties, Formatting.Indented);
+            else
+                return null;
         }
 
         public string Update(string documentId, string updatedPropertiesJson)
@@ -79,6 +93,10 @@ namespace CouchbaseLiteManager
             pull = _database.CreatePullReplication(CreateSyncUri());
             push = _database.CreatePushReplication(CreateSyncUri());
 
+            var authenticator = AuthenticatorFactory.CreateBasicAuthenticator("david", "12345");
+            pull.Authenticator = authenticator;
+            push.Authenticator = authenticator;
+
             pull.Continuous = true;
             push.Continuous = true;
 
@@ -111,7 +129,7 @@ namespace CouchbaseLiteManager
             string scheme = "http";
             string host = "localhost";
             int port = 4984;
-            string dbName = "couchbaselitedemo";
+            string dbName = "delphi";
             try
             {
                 var uriBuilder = new UriBuilder(scheme, host, port, dbName);

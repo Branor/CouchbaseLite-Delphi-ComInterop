@@ -1,7 +1,7 @@
 object Form1: TForm1
   Left = 0
   Top = 0
-  Caption = 'Form1'
+  Caption = 'Couchbase Delphi Interop'
   ClientHeight = 422
   ClientWidth = 426
   Color = clBtnFace
@@ -18,7 +18,7 @@ object Form1: TForm1
     Top = 8
     Width = 410
     Height = 185
-    Caption = 'Couchbase sever'
+    Caption = 'Couchbase Sever'
     TabOrder = 0
     object Button1: TButton
       Left = 72
@@ -115,6 +115,7 @@ object Form1: TForm1
       Width = 160
       Height = 21
       TabOrder = 5
+      Text = 'test'
     end
   end
 end

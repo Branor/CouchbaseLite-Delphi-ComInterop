@@ -12,7 +12,7 @@ namespace CouchbaseLiteManager
 
         void StopSyncGateway();
 
-        string Insert(string propertiesJson);
+        string Insert(string docId, string propertiesJson);
 
         string Get(string docId);
 

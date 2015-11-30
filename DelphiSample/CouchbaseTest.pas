@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls , CouchbaseFacade_TLB, CouchbaseLiteManager_TLB, ActiveX;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, CouchbaseLiteManager_TLB, DelphiCouchbaseInterop_TLB, ActiveX;
 
 type
   TForm1 = class(TForm)
@@ -34,8 +34,6 @@ type
     { Private declarations }
   public
     CouchbaseLite : ICouchbaseLiteFacade;
-    CBLDocumentId : WideString;
-
   end;
 
   TMyThread = class(TThread)
@@ -86,13 +84,13 @@ end;
 
 procedure TMyThread.Execute;
 var
-  Couchbase : IComCouchbaseFacade;
+  Couchbase : ICouchbaseFacade;
   i : Integer;
 begin
 
   CoInitialize(Nil);
 
-  Couchbase := CoComCouchbaseFacade.Create;
+  Couchbase := CoCouchbaseFacade.Create;
 
   if BIsGet then
   begin
@@ -105,26 +103,32 @@ begin
       Couchbase.Upsert('_delphiKey' + i.ToString, 'Hello World');
     end;
 
-  Couchbase.Disconnect;
-
   CoUnInitialize;
 
 end;
 
-procedure TForm1.btnCBLUpdate(Sender: TObject);
-var
-  document, updatedDocument : WideString;
+// Couchbase Lite
 
-begin
-      document := '{"name": "Roi Katz", "age":32, "job":  "Couchbase SE1" }';
-      updatedDocument := CouchbaseLite.Update(CBLDocumentId, document);
-      ShowMessage(updatedDocument);
-end;
-
-procedure TForm1.btnGetCBLClick(Sender: TObject);
+procedure TForm1.btnSyncClick(Sender: TObject);
 begin
 
- ShowMessage( CouchbaseLite.Get(editId.Text));
+  if btnSync.Caption = 'Start' then
+  begin
+    CoInitialize(Nil);
+    CouchbaseLite := CoCouchbaseLiteFacade.Create;
+
+    CouchbaseLite.StartSyncGateway('localhost');
+
+    btnSync.Caption := 'Stop';
+  end
+  else
+  begin
+    CouchbaseLite.StopSyncGateway;
+    btnSync.Caption := 'Start';
+
+    CoUninitialize;
+  end;
+
 end;
 
 procedure TForm1.btnInsertCBLClick(Sender: TObject);
@@ -132,21 +136,37 @@ var
   document : WideString;
 
 begin
-  document := '{"name": "Roi K", "age":31, "job":  "Couchbase SE" }';
-  CBLDocumentId := CouchbaseLite.Insert(document);
-  editId.Text := CBLDocumentId;
+  document := '{"name": "David Ostrovsky", "age":36, "job":  "Couchbase SA", "updated":"' + DateTimeToStr(Now) + '" }';
+  editId.Text := CouchbaseLite.Insert(editId.Text, document);
+end;
+
+procedure TForm1.btnGetCBLClick(Sender: TObject);
+begin
+ ShowMessage( CouchbaseLite.Get(editId.Text));
+end;
+
+procedure TForm1.btnCBLUpdate(Sender: TObject);
+var
+  document, updatedDocument : WideString;
+
+begin
+      document := '{"name": "David - Code Monkey - Ostrovsky", "age":36, "job":  "Couchbase SA", "updated":"' + DateTimeToStr(Now) + '" }';
+      updatedDocument := CouchbaseLite.Update(editId.Text, document);
+      ShowMessage(updatedDocument);
 end;
 
 procedure TForm1.btnCBLDelete(Sender: TObject);
 begin
-  if CouchbaseLite.Delete(CBLDocumentId) then
+  if CouchbaseLite.Delete(editId.Text) then
   begin
-    ShowMessage('Document ' + CBLDocumentId + ' has been deleted');
+    ShowMessage('Document ' + editId.Text + ' has been deleted');
     editId.Text := '';
   end
   else
      ShowMessage('Document has NOT been deleted');
 end;
+
+// Couchbase Server
 
 procedure TForm1.MixedReadWriteCB(Sender: TObject);
 var
@@ -216,59 +236,33 @@ begin
        MyThread7.Start;
 end;
 
-
-procedure TForm1.btnSyncClick(Sender: TObject);
-begin
-
-  if btnSync.Caption = 'Start' then
-  begin
-    CoInitialize(Nil);
-    CouchbaseLite := CoCouchbaseLiteFacade.Create;
-
-    CouchbaseLite.StartSyncGateway('localhost');
-
-    btnSync.Caption := 'Stop';
-  end
-  else
-  begin
-    CouchbaseLite.StopSyncGateway;
-    btnSync.Caption := 'Start';
-
-    CoUninitialize;
-  end;
-
-end;
-
 procedure TForm1.Button1Click(Sender: TObject);
 var
   I : Integer;
   MyThread : TMyThread;
-  Couchbase : IComCouchbaseFacade;
+  Couchbase : ICouchbaseFacade;
 begin
   CoInitialize(Nil);
 
-  Couchbase := CoComCouchbaseFacade.Create;
+  Couchbase := CoCouchbaseFacade.Create;
 
   for I := 1 to 1000000 do
   begin
       Couchbase.Upsert('_delphiKey' + i.ToString, 'Hello World');
   end;
 
-  Couchbase.Disconnect;
-
   CoUnInitialize;
 end;
 
 procedure TForm1.Button2Click(Sender: TObject);
 var
-  Couchbase : IComCouchbaseFacade;
+  Couchbase : ICouchbaseFacade;
 
 begin
-  Couchbase := CoComCouchbaseFacade.Create;
-//
+  Couchbase := CoCouchbaseFacade.Create;
+
   Couchbase.Upsert('_delphiKey' , 'Hello World');
-//
-  Couchbase.Disconnect;
+
 end;
 
 procedure TForm1.Button3Click(Sender: TObject);
@@ -358,9 +352,6 @@ begin
 //       MyThread9.Start;
 //       MyThread10.Start;
 end;
-
-
-
 
 
 end.
